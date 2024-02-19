@@ -96,6 +96,7 @@ namespace EcommerceDotNetCore
                 });
 
             builder.Services.AddScoped<IRepository<Category>, CategoryRepository>();
+            builder.Services.AddScoped<IRepository<Product>, ProductRepository>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

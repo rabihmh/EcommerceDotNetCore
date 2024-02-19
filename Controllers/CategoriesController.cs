@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using EcommerceDotNetCore.Data;
 using EcommerceDotNetCore.DTOs.Category;
 using EcommerceDotNetCore.Models;
 using EcommerceDotNetCore.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -10,15 +13,18 @@ namespace EcommerceDotNetCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoriesController : ControllerBase
     {
        private readonly IRepository<Category> _categoryRepository;
+       private readonly ApplicationDbContext _context;
        private readonly IMapper _mapper;
 
 
-        public CategoriesController(IRepository<Category> categoryRepository,IMapper mapper)
+        public CategoriesController(IRepository<Category> categoryRepository,IMapper mapper,ApplicationDbContext context)
        {
            _categoryRepository = categoryRepository;
+              _context = context;
            _mapper = mapper;
        }
 
@@ -87,7 +93,17 @@ namespace EcommerceDotNetCore.Controllers
 
             return NoContent();
         }
-
-
+        [HttpGet("{id}/products")]
+        public async Task<ActionResult<IEnumerable<Product>>> GetProductsByCategory(int id)
+        {
+            var category = await _categoryRepository.FindByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            var products = _context.Categories.Include(c => c.Products).FirstOrDefault(c => c.Id == id)?.Products;
+            
+            return Ok(products);
+        }
     }
 }

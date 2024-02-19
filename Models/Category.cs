@@ -19,5 +19,6 @@ public class Category
     public virtual Category ParentCategory { get; set; }
 
     public virtual ICollection<Category> ChildCategories { get; set; }
+    public virtual ICollection<Product> Products { get; set; }
 
 }
