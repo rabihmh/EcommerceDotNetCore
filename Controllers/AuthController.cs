@@ -26,8 +26,20 @@ namespace EcommerceDotNetCore.Controllers
             var result =await _authService.RegisterAsync(model);
             if(result.IsAuthenticate is false)
                 return BadRequest(result.Message);
+            //return Ok(new { token = result.Token, expireOn = result.ExpiresON });
             return Ok(result);
+        }
+        [HttpPost]
 
+        [Route("login")]
+        public async Task<IActionResult> GetTokenAsync([FromBody] TokenRequestModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var result = await _authService.GetTokenAsync(model);
+            if (result.IsAuthenticate is false)
+                return BadRequest(result.Message);
+            return Ok(result);
         }
     }
 }

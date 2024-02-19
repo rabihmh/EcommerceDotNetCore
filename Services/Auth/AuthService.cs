@@ -89,4 +89,28 @@ public class AuthService : IAuthService
 
         return jwtSecurityToken;
     }
+
+    public async Task<AuthModel> GetTokenAsync(TokenRequestModel model)
+    {
+        var authModel=new AuthModel();
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user is null || !await _userManager.CheckPasswordAsync(user, model.Password))
+        {
+            authModel.Message = "Email or Password is incorrect";
+            return authModel;
+        }
+
+        
+        var jwt = await CreateJwtToken(user);
+        var rolesList = await _userManager.GetRolesAsync(user);
+
+        authModel.IsAuthenticate = true;
+        authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwt);
+        authModel.Email = user.Email;
+        authModel.Username = user.UserName;
+        authModel.ExpiresON = jwt.ValidTo;
+        authModel.Roles = rolesList.ToList();
+
+        return authModel;
+    }
 }
