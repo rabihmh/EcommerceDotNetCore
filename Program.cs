@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace EcommerceDotNetCore
 {
@@ -23,7 +24,33 @@ namespace EcommerceDotNetCore
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "authorize", Version = "1" });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Enter Jwt Token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                        },
+                        new string[]{}
+                    }
+                });
+            });
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
@@ -33,6 +60,16 @@ namespace EcommerceDotNetCore
             builder.Services.Configure<Jwt>(builder.Configuration.GetSection("JWT"));
 
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("all", builder =>
+                {
+                    builder.WithOrigins("http://localhost:5173")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                });
+            });
 
             builder.Services.AddAuthentication(options =>
             {
@@ -64,6 +101,7 @@ namespace EcommerceDotNetCore
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("all");
             app.UseHttpsRedirection();
 
             app.UseAuthentication();

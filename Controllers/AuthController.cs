@@ -1,5 +1,6 @@
 ﻿using EcommerceDotNetCore.Models;
 using EcommerceDotNetCore.Services.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,6 +41,14 @@ namespace EcommerceDotNetCore.Controllers
             if (result.IsAuthenticate is false)
                 return BadRequest(result.Message);
             return Ok(result);
+        }
+        //[Authorize]
+        [Authorize(Roles = "Admin")]
+        [HttpGet("test")]
+
+        public IActionResult TestAuth()
+        {
+            return Ok("Authenticate");
         }
     }
 }
