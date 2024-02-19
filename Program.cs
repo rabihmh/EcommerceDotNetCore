@@ -4,6 +4,7 @@ using System.Text;
 using EcommerceDotNetCore.Data;
 using EcommerceDotNetCore.Helpers;
 using EcommerceDotNetCore.Models;
+using EcommerceDotNetCore.Repository;
 using EcommerceDotNetCore.Services.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +23,7 @@ namespace EcommerceDotNetCore
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddAutoMapper(typeof(Mapper));
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
@@ -92,6 +94,8 @@ namespace EcommerceDotNetCore
 
                     };
                 });
+
+            builder.Services.AddScoped<IRepository<Category>, CategoryRepository>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
