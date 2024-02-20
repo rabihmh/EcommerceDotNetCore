@@ -4,8 +4,10 @@
 
 namespace EcommerceDotNetCore.Migrations
 {
+    /// <inheritdoc />
     public partial class SeedRoles : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.InsertData(
@@ -26,9 +28,11 @@ namespace EcommerceDotNetCore.Migrations
             );
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql("DELETE FROM [AspNetRoles]");
+
         }
     }
 }

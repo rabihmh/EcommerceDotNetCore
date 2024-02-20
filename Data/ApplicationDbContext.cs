@@ -23,17 +23,15 @@ namespace EcommerceDotNetCore.Data
                 .HasMany(c => c.ChildCategories)
                 .WithOne(c => c.ParentCategory)
                 .HasForeignKey(c => c.ParentCategoryId);
-            
+
             builder.Entity<Category>()
                 .HasMany(c => c.Products)
                 .WithOne(p => p.Category)
-                .HasForeignKey(p => p.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict); 
-            builder.Entity<Product>()
-                .HasOne(p => p.Category)
-                .WithMany()
-                .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Product>()
+                .Property(p => p.Price)
+                .HasColumnType("decimal(18,2)");
         }
 
         public DbSet<Category> Categories { get; set; }

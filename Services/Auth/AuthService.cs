@@ -4,8 +4,10 @@ using System.Text;
 using EcommerceDotNetCore.Helpers;
 using EcommerceDotNetCore.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 namespace EcommerceDotNetCore.Services.Auth;
@@ -13,12 +15,14 @@ namespace EcommerceDotNetCore.Services.Auth;
 public class AuthService : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly Jwt _jwt;
 
-    public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt)
+    public AuthService(UserManager<ApplicationUser> userManager, IOptions<Jwt> jwt, IHttpContextAccessor httpContextAccessor)
     {
         _userManager = userManager;
         _jwt = jwt.Value;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<AuthModel> RegisterAsync(RegisterModel model)
@@ -113,4 +117,31 @@ public class AuthService : IAuthService
 
         return authModel;
     }
+
+    public async Task<AuthModel> GetUserDetails()
+    {
+        
+            var claimsIdentity = _httpContextAccessor.HttpContext.User.Identity;
+            var emailClaim = ((ClaimsIdentity)claimsIdentity).FindFirst(ClaimTypes.Email)?.Value;
+
+            if (emailClaim != null)
+            {
+                var user = await _userManager.FindByEmailAsync(emailClaim);
+                if (user != null)
+                {
+
+
+                    return new AuthModel
+                    {
+                        Email = user.Email,
+                        IsAuthenticate = true,
+                        Roles = new List<string> { "User" },
+                        Username = user.UserName
+                    };
+                }
+            }
+            return null;
+    
+    }
+
 }

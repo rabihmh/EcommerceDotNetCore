@@ -305,7 +305,7 @@ namespace EcommerceDotNetCore.Migrations
             modelBuilder.Entity("EcommerceDotNetCore.Models.Product", b =>
                 {
                     b.HasOne("EcommerceDotNetCore.Models.Category", "Category")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -367,6 +367,8 @@ namespace EcommerceDotNetCore.Migrations
             modelBuilder.Entity("EcommerceDotNetCore.Models.Category", b =>
                 {
                     b.Navigation("ChildCategories");
+
+                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

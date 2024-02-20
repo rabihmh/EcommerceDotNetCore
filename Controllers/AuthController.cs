@@ -50,5 +50,19 @@ namespace EcommerceDotNetCore.Controllers
         {
             return Ok("Authenticate");
         }
+        [HttpGet("info")]
+        public async Task<IActionResult> getUserDetails()
+        {
+            var user = await _authService.GetUserDetails();
+
+            if (user is null)
+            {
+                return BadRequest();
+            }
+            return Ok(new
+            {
+                user = user
+            });
+        }
     }
 }
