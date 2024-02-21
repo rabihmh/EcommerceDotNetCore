@@ -2,6 +2,7 @@
 using EcommerceDotNetCore.DTOs.Product;
 using EcommerceDotNetCore.Models;
 using EcommerceDotNetCore.Repository;
+using EcommerceDotNetCore.Services.Media;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceDotNetCore.Controllers;
@@ -11,12 +12,14 @@ namespace EcommerceDotNetCore.Controllers;
 public class ProductsController:ControllerBase
 {
     private readonly IRepository<Product> _productRepository;
+    private readonly IImageService _imageService;
     private IMapper _mapper;
 
-    public ProductsController(IRepository<Product> productRepository, IMapper mapper)
+    public ProductsController(IRepository<Product> productRepository, IMapper mapper, IImageService imageService)
     {
         _productRepository = productRepository;
         _mapper = mapper;
+        _imageService = imageService;   
     }
     [HttpGet]
     public async Task<IEnumerable<Product>> Get()
@@ -32,25 +35,64 @@ public class ProductsController:ControllerBase
         return product;
     }
     [HttpPost]
-    public async Task<IActionResult> CreateProduct(ProductCreateDto productDto)
+    public async Task<IActionResult> CreateProduct([FromForm] ProductCreateDto productDto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
-        var product = _mapper.Map<Product>(productDto);
-        await _productRepository.AddAsync(product);
-        return StatusCode(201);
+
+        try
+        {
+            string imagePath = null;
+
+            if (productDto.Image != null)
+            {
+                imagePath = _imageService.UploadImage("wwwroot", "products", productDto.Image.FileName, productDto.Image.OpenReadStream());
+            }
+
+            var product = _mapper.Map<Product>(productDto);
+            product.ImagePath = imagePath;
+
+            await _productRepository.AddAsync(product);
+                
+            return StatusCode(201); 
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductDto productDto)
+    public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductDto productDto)
     {
         var product = await _productRepository.FindByIdAsync(id);
-        if (product == null||productDto.Id!=id)
+        if (product == null || productDto.Id != id)
         {
             return NotFound();
         }
-        _mapper.Map(productDto, product);
-        await _productRepository.UpdateAsync(product);
-        return Ok();
+
+        try
+        {
+            if (!string.IsNullOrEmpty(product.ImagePath))
+            {
+                _imageService.DeleteImage("wwwroot", "products", Path.GetFileName(product.ImagePath));
+            }
+
+            string imagePath = product.ImagePath;
+
+            if (productDto.Image != null)
+            {
+               imagePath= _imageService.UploadImage("wwwroot", "products", productDto.Image.FileName, productDto.Image.OpenReadStream());
+            }
+            product.ImagePath = imagePath;
+            _mapper.Map(productDto, product);
+            await _productRepository.UpdateAsync(product);
+
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(int id)
@@ -60,8 +102,12 @@ public class ProductsController:ControllerBase
         {
             return NotFound();
         }
+        if (!string.IsNullOrEmpty(product.ImagePath))
+        {
+            _imageService.DeleteImage("wwwroot", "products", Path.GetFileName(product.ImagePath));
+        }
         await _productRepository.DeleteAsync(product);
-        return Ok();
+        return NoContent();
     }
     
 }

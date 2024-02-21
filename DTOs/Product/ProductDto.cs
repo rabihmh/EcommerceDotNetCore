@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+
 namespace EcommerceDotNetCore.DTOs.Product
 {
     public class ProductDto
@@ -12,10 +14,10 @@ namespace EcommerceDotNetCore.DTOs.Product
         public decimal Price { get; set; }
 
         public string Description { get; set; }
-
-        public string ImagePath { get; set; }
-
+        
         public int CategoryId { get; set; }
+        [Required]
+        public IFormFile Image { get; set; }
 
     }
 }

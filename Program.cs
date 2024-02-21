@@ -6,6 +6,7 @@ using EcommerceDotNetCore.Helpers;
 using EcommerceDotNetCore.Models;
 using EcommerceDotNetCore.Repository;
 using EcommerceDotNetCore.Services.Auth;
+using EcommerceDotNetCore.Services.Media;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -62,11 +63,12 @@ namespace EcommerceDotNetCore
             builder.Services.Configure<Jwt>(builder.Configuration.GetSection("JWT"));
 
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IImageService, ImageService>();
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("all", builder =>
                 {
-                    builder.WithOrigins("http://localhost:5174")
+                    builder.WithOrigins("http://localhost:5173")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials();
@@ -107,6 +109,8 @@ namespace EcommerceDotNetCore
             }
 
             app.UseCors("all");
+            app.UseStaticFiles();
+
             app.UseHttpsRedirection();
 
             app.UseAuthentication();

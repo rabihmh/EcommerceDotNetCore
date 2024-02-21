@@ -1,4 +1,6 @@
-﻿namespace EcommerceDotNetCore.DTOs.Product
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceDotNetCore.DTOs.Product
 {
     public class ProductCreateDto
     {
@@ -10,9 +12,9 @@
 
         public string Description { get; set; }
 
-        public string ImagePath { get; set; }
-
         public int CategoryId { get; set; }
         public DateTime CreatedDate { get; set; }=DateTime.Now;
+       [Required]
+        public IFormFile Image { get; set; }
     }
 }
