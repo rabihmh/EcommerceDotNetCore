@@ -41,28 +41,6 @@ namespace EcommerceDotNetCore.Controllers
             if (result.IsAuthenticate is false)
                 return BadRequest(result.Message);
             return Ok(result);
-        }
-        //[Authorize]
-        [Authorize(Roles = "Admin")]
-        [HttpGet("test")]
-
-        public IActionResult TestAuth()
-        {
-            return Ok("Authenticate");
-        }
-        [HttpGet("info")]
-        public async Task<IActionResult> getUserDetails()
-        {
-            var user = await _authService.GetUserDetails();
-
-            if (user is null)
-            {
-                return BadRequest();
-            }
-            return Ok(new
-            {
-                user = user
-            });
-        }
+        }        
     }
 }

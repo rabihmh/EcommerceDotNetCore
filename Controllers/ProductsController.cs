@@ -3,12 +3,14 @@ using EcommerceDotNetCore.DTOs.Product;
 using EcommerceDotNetCore.Models;
 using EcommerceDotNetCore.Repository;
 using EcommerceDotNetCore.Services.Media;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceDotNetCore.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class ProductsController:ControllerBase
 {
     private readonly IRepository<Product> _productRepository;

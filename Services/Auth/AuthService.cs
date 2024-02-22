@@ -55,6 +55,7 @@ public class AuthService : IAuthService
      var jwtToken = await CreateJwtToken(user);
      return new AuthModel
      {
+         Message = "Registered successfully",
          Email = user.Email,
          ExpiresON = jwtToken.ValidTo,
          IsAuthenticate = true,
@@ -107,7 +108,7 @@ public class AuthService : IAuthService
         
         var jwt = await CreateJwtToken(user);
         var rolesList = await _userManager.GetRolesAsync(user);
-
+        authModel.Message = "success";
         authModel.IsAuthenticate = true;
         authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwt);
         authModel.Email = user.Email;

@@ -1,6 +1,7 @@
 ﻿using EcommerceDotNetCore.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace EcommerceDotNetCore.Data
 {
@@ -32,9 +33,23 @@ namespace EcommerceDotNetCore.Data
             builder.Entity<Product>()
                 .Property(p => p.Price)
                 .HasColumnType("decimal(18,2)");
+
+            builder.Entity<Cart>()
+            .HasMany(c => c.CartItems)
+            .WithOne(ci => ci.Cart)
+            .HasForeignKey(ci => ci.CartId);
+
+            builder.Entity<Order>()
+               .HasMany(o => o.OrderItems)
+               .WithOne(oi => oi.Order)
+               .HasForeignKey(oi => oi.OrderId);
         }
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set;}
     }
 }
