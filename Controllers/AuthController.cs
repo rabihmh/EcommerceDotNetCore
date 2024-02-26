@@ -1,5 +1,6 @@
 ﻿using EcommerceDotNetCore.Models;
 using EcommerceDotNetCore.Services.Auth;
+using EcommerceDotNetCore.Services.EmailService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,12 @@ namespace EcommerceDotNetCore.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IEmailService _emailService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IEmailService emailService)
         {
             _authService = authService;
+            _emailService = emailService;
         }
 
         [HttpPost]
@@ -31,7 +34,6 @@ namespace EcommerceDotNetCore.Controllers
             return Ok(result);
         }
         [HttpPost]
-
         [Route("login")]
         public async Task<IActionResult> GetTokenAsync([FromBody] TokenRequestModel model)
         {
@@ -41,6 +43,21 @@ namespace EcommerceDotNetCore.Controllers
             if (result.IsAuthenticate is false)
                 return BadRequest(result.Message);
             return Ok(result);
-        }        
+        }  
+        [HttpGet("sendTestEmail/{to}")]
+        public async Task<IActionResult> SendTestEmail(string to)
+        {
+            await _emailService.SendEmailAsync(to, "Test Email", "<h1>Test Email</h1>");
+            return Ok("Email Sent");
+        }
+        [HttpPost("confirmemail")]
+        public async Task<IActionResult> ConfirmEmail([FromBody]ConfirmEmailModel model)
+        {
+            var result = await _authService.ConfirmEmail(model.UserId, model.Token);
+            if (result.IsEmailConfirm is false)
+                return BadRequest(result.Message);
+            return Ok(result.Message);
+        }
+       
     }
 }

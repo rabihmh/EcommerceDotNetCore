@@ -2,10 +2,11 @@
 using System.Configuration;
 using System.Text;
 using EcommerceDotNetCore.Data;
-using EcommerceDotNetCore.Helpers;
+using EcommerceDotNetCore.Configurations;
 using EcommerceDotNetCore.Models;
 using EcommerceDotNetCore.Repository;
 using EcommerceDotNetCore.Services.Auth;
+using EcommerceDotNetCore.Services.EmailService;
 using EcommerceDotNetCore.Services.Media;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -55,15 +56,18 @@ namespace EcommerceDotNetCore
                 });
             });
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
                 builder.Configuration.GetConnectionString("DefaultConnection")
             ));
             builder.Services.Configure<Jwt>(builder.Configuration.GetSection("JWT"));
+            builder.Services.Configure<Smtp>(builder.Configuration.GetSection("SMTP"));
 
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IImageService, ImageService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("all", builder =>

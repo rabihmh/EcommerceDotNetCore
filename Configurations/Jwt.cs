@@ -1,4 +1,4 @@
-﻿namespace EcommerceDotNetCore.Helpers
+﻿namespace EcommerceDotNetCore.Configurations
 {
     public class Jwt
     {

@@ -5,6 +5,7 @@
         public string Message { get; set; }
 
         public bool IsAuthenticate { get; set; }
+        public bool IsEmailConfirm { get; set; }=false;
 
         public string Username { get; set; }
 
