@@ -5,9 +5,11 @@ using EcommerceDotNetCore.Configurations;
 using EcommerceDotNetCore.Models;
 using EcommerceDotNetCore.Services.EmailService;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Newtonsoft.Json.Linq;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
@@ -151,6 +153,7 @@ public class AuthService : IAuthService
             }
             return null;
     }
+
     public async Task<AuthModel> ConfirmEmail(string userId, string token)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -162,6 +165,31 @@ public class AuthService : IAuthService
             return new AuthModel { Message = "Email Confirmed Successfully", IsEmailConfirm = true};
         return new AuthModel { Message = "Email Confirmation Failed" };
     }
+
+    public async Task<AuthModel> ForgotPasswordAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+            return new AuthModel { Message = "No user associated with this email" };
+        await SendForgetPasswordEmailAsync(user);
+        return new AuthModel { Message = "Rest Password URL has been sent to the email successfully",IsSuccess=true };
+    }
+    public async Task<AuthModel> ResetPasswordAsync(ResetPasswordModel model)
+    {
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user is null)
+            return new AuthModel { Message = "No user associated with this email" };
+        //var decodedTokenBytes = WebEncoders.Base64UrlDecode(model.Token);
+        //var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+
+        var result = _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+        _logger.LogInformation(JObject.FromObject(result).ToString());
+        if (result.IsFaulted) return new AuthModel { Message = "Something went wrong" };
+
+        return new AuthModel { Message ="Password Has Been Reset Successfully",IsSuccess=true };
+    }
+
+
     private async Task SendConfirmationEmail(ApplicationUser user)
     {
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -182,6 +210,24 @@ public class AuthService : IAuthService
         _logger.LogInformation("Token: " + token);
         _logger.LogInformation("Confirmation Link: " + confirmationLink);
         await _emailService.SendEmailAsync(user.Email, "Confirm Email", message);
+    }
+    private async Task SendForgetPasswordEmailAsync(ApplicationUser user)
+    {
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+       // var encodedToken = Encoding.UTF8.GetBytes(token);
+        //var validToken = WebEncoders.Base64UrlEncode(encodedToken);
+
+        var link =_httpContextAccessor.HttpContext.Request.Host + $"/api/Auth/reset-password/{user.Email}/{token}";
+        var message = $@"
+                        <h1>Forgot Password</h1>
+                        Hello {user.UserName},<br>
+                        Please click the below link to verify your email<br>
+                        <a href='{link}' style='display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none;'>Click Here</a><br>
+                        If the above link does not work, you can copy and paste the below link in your browser<br>
+                        {link}<br>
+                        {token}<br>
+                     ";
+        await _emailService.SendEmailAsync(user.Email, "Reset Password", message);
     }
 
 }

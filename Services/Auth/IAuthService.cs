@@ -10,5 +10,7 @@ public interface IAuthService
     public Task<AuthModel> GetTokenAsync(TokenRequestModel model);
     public Task<AuthModel> GetUserDetails();
     public Task<AuthModel> ConfirmEmail(string userId, string token);
+    public Task<AuthModel> ForgotPasswordAsync(string email);
+    public Task<AuthModel> ResetPasswordAsync(ResetPasswordModel model);
     //public Task<string>AddRoleModelAsync(AddRoleModel model);
 }

@@ -58,6 +58,29 @@ namespace EcommerceDotNetCore.Controllers
                 return BadRequest(result.Message);
             return Ok(result.Message);
         }
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPasswordAsync(string email)
+        {
+            if (email is null)
+                return BadRequest("Email Shouldn't Be Empty");
+            var result=await _authService.ForgotPasswordAsync(email);
+            if (result.IsSuccess == false)
+                return BadRequest(result.Message);
+            return Ok(result.Message);
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPasswordAsync(ResetPasswordModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var result = await _authService.ResetPasswordAsync(model);
+            if (result.IsSuccess == false)
+                return BadRequest(result.Message);
+            return Ok(result.Message);
+
+        }
+        
        
     }
 }
