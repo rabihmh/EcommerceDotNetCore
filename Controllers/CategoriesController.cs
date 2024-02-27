@@ -13,7 +13,7 @@ namespace EcommerceDotNetCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Policy = "RequireEmailConfirmation")]
     public class CategoriesController : ControllerBase
     {
        private readonly IRepository<Category> _categoryRepository;

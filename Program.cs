@@ -1,6 +1,8 @@
 
 using System.Configuration;
 using System.Text;
+using EcommerceDotNetCore.AuthorizationHandlers;
+using EcommerceDotNetCore.AuthorizationRequirements;
 using EcommerceDotNetCore.Data;
 using EcommerceDotNetCore.Configurations;
 using EcommerceDotNetCore.Models;
@@ -9,6 +11,7 @@ using EcommerceDotNetCore.Services.Auth;
 using EcommerceDotNetCore.Services.EmailService;
 using EcommerceDotNetCore.Services.Media;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -100,6 +103,13 @@ namespace EcommerceDotNetCore
 
                     };
                 });
+            
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireEmailConfirmation", policy =>
+                    policy.Requirements.Add(new EmailConfirmedRequirement()));
+            });
+            builder.Services.AddScoped<IAuthorizationHandler, EmailConfirmedRequirementHandler>();
 
             builder.Services.AddScoped<IRepository<Category>, CategoryRepository>();
             builder.Services.AddScoped<IRepository<Product>, ProductRepository>();
